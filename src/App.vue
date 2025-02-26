@@ -7,14 +7,23 @@
       @change-screen="changeScreen"
       @select-location="selectLocation"
     />
-    <FishingScreen
-  v-if="screen === 'fishing' && currentLocation"
-  :currentLocation="currentLocation"
-  :rods="rods"
-  :baits="baits"
-  @change-screen="changeScreen"
-/>
-
+    <FishingScreen 
+      v-if="screen === 'fishing'"
+      :currentLocation="currentLocation" 
+      :rods="rods" 
+      :baits="baits" 
+      :inventory="inventory.getFishes()" 
+      @update-inventory="updateInventory" 
+    />
+    <div v-if="screen === 'inventory'">
+      <h2>Инвентарь</h2>
+      <ul>
+        <li v-for="(fish, index) in inventory.getFishes()" :key="index">
+          {{ fish.name }}: {{ fish.count }}
+        </li>
+      </ul>
+      <button @click="changeScreen('menu')">Вернуться в меню</button>
+    </div>
   </div>
 </template>
 
@@ -22,6 +31,7 @@
 import MainMenu from "./components/MainMenu.vue";
 import FishingLocations from "./components/FishingLocations.vue";
 import FishingScreen from "./components/FishingScreen.vue";
+import Inventory from './models/inventory.js'; 
 
 export default {
   name: "App",
@@ -48,7 +58,8 @@ export default {
         { id: 2, name: "Кукуруза", catchBonus: 0.1 },
         { id: 3, name: "Опарыш", catchBonus: 0.3 }
       ],
-      currentLocation: null
+      currentLocation: null,
+      inventory: new Inventory() // создаем инвентарь
     };
   },
   methods: {
@@ -58,6 +69,9 @@ export default {
     selectLocation(location) {
       this.currentLocation = location;
       this.changeScreen("fishing");
+    },
+    updateInventory(fish) {
+      this.inventory.addFish(fish); // добавляем рыбу в инвентарь
     }
   }
 };

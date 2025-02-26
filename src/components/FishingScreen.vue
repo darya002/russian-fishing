@@ -37,6 +37,16 @@
       <p v-if="isCaught">Поздравляем, рыба поймана!</p>
     </div>
 
+    <!-- Инвентарь -->
+    <div v-if="!isFishing && inventory.length > 0">
+      <h3>Ваш инвентарь</h3>
+      <ul>
+        <li v-for="(fish, index) in inventory" :key="index">
+          {{ fish.name }} x {{ fish.count }}
+        </li>
+      </ul>
+    </div>
+
     <button @click="$emit('change-screen', 'locations')">Назад</button>
   </div>
 </template>
@@ -44,7 +54,7 @@
 <script>
 export default {
   name: "FishingScreen",
-  props: ["currentLocation", "rods", "baits"],
+  props: ["currentLocation", "rods", "baits", "inventory"],
   data() {
     return {
       selectedRod: null,
@@ -130,11 +140,23 @@ export default {
       if (randomChance < this.totalCatchChance) {
         this.isCaught = true;
         alert("Вы поймали рыбу!");
+
+        // Эмитируем событие с обновленным инвентарем
+        this.addFishToInventory();
       } else {
         alert("Рыба ускользнула!");
       }
       this.isFishing = false;
       this.isRodReturned = true;  // Удочка возвращается в вертикальное положение после подсекания
+    },
+    addFishToInventory() {
+      const fish = {
+        name: this.selectedRod.name === "Элитная удочка" ? "Карп" : "Окунь",
+        count: 1
+      };
+
+      // Эмитируем событие для обновления инвентаря в родительском компоненте
+      this.$emit('update-inventory', fish);
     }
   }
 };
@@ -170,5 +192,17 @@ export default {
 /* Возврат удочки в вертикальное положение после подсекания */
 .rod.returned {
   transform: translateX(-50%) rotate(0deg); /* Вернуть в вертикальное положение */
+}
+
+/* Стиль воды */
+.water {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 20px;
+  background-size: cover;
+  background-position: center;
 }
 </style>
