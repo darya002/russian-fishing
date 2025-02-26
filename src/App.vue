@@ -1,28 +1,61 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <MainMenu v-if="screen === 'menu'" @change-screen="changeScreen" />
+    <FishingLocations
+      v-if="screen === 'locations'"
+      :locations="locations"
+      @change-screen="changeScreen"
+      @select-location="selectLocation"
+    />
+    <FishingScreen
+      v-if="screen === 'fishing'"
+      :currentLocation="currentLocation"
+      :rods="rods"
+      :baits="baits"
+      @change-screen="changeScreen"
+    />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MainMenu from "./components/MainMenu.vue";
+import FishingLocations from "./components/FishingLocations.vue";
+import FishingScreen from "./components/FishingScreen.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
+    MainMenu,
+    FishingLocations,
+    FishingScreen
+  },
+  data() {
+    return {
+      screen: "menu",
+      locations: [
+        { id: 1, name: "Озеро", image: "/assets/lake.jpg" },
+        { id: 2, name: "Река", image: "/assets/river.jpg" },
+        { id: 3, name: "Пруд", image: "/assets/pond.jpg" }
+      ],
+      rods: [
+        { id: 1, name: "Обычная удочка", castTime: 2, catchChance: 0.3 },
+        { id: 2, name: "Профессиональная удочка", castTime: 1, catchChance: 0.6 }
+      ],
+      baits: [
+        { id: 1, name: "Червь", catchBonus: 0.2 },
+        { id: 2, name: "Кукуруза", catchBonus: 0.1 }
+      ],
+      currentLocation: null
+    };
+  },
+  methods: {
+    changeScreen(screen) {
+      this.screen = screen;
+    },
+    selectLocation(location) {
+      this.currentLocation = location;
+      this.changeScreen("fishing");
+    }
   }
-}
+};
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
