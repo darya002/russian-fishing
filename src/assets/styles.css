@@ -1,3 +1,4 @@
+/* Общие стили */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -13,6 +14,7 @@ button {
     background-color: #007BFF;
     color: white;
     border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 button:disabled {
@@ -35,20 +37,19 @@ select {
     border-radius: 5px;
 }
 
-/* Визуализация воды */
+/* Блок с водой */
 .water {
     position: relative;
     width: 100%;
     height: 200px;
-    border-radius: 20px 20px 20px 20px;
+    border-radius: 20px;
     overflow: hidden;
     margin-top: 20px;
-    background-size: cover; /* Подгонка фона */
-    background-position: center; /* Центрирование фона */
+    background-size: cover;
+    background-position: center;
 }
 
-/* Удочка */
-/* Удочка */
+/* 🌿 Удочка */
 .rod {
     position: absolute;
     bottom: -50px;
@@ -58,28 +59,52 @@ select {
     background-color: #6B4F47;
     border-radius: 5px;
     transform-origin: top;
-    transition: transform 1s ease-in-out;
+    transition: transform 0.5s ease-in-out;
 }
 
-/* Анимация заброса удочки */
-.rod.animate {
-    transform: translateX(-50%) rotate(90deg);
+/* Анимация заброса */
+.rod.throwing {
+    transform: rotate(-30deg); /* Отклоняем удочку назад */
 }
 
+.rod.cast {
+    transform: rotate(30deg); /* Делает резкий рывок вперед */
+}
 
+.rod.default {
+    transform: rotate(0deg); /* Возвращается в исходное положение */
+}
 
-/* Байт (для имитации воды и клев) */
+/* 💦 Анимация полета наживки */
 .bait {
     position: absolute;
-    bottom: 20px; /* Подвигаем чуть ниже */
+    bottom: 20px;
     left: 50%;
     font-size: 24px; 
-    animation: wave 1s ease-in-out infinite;
+    transition: transform 0.8s ease-out;
 }
 
-/* Волнение воды (волны) */
+.bait.flying {
+    transform: translate(-10px, -50px); /* Полет наживки перед падением в воду */
+}
+
+/* 🐟 Анимация поклевки */
+.bait.biting {
+    animation: bite 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes bite {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-5px); }
+}
+
+/* 🌊 Анимация волн */
 @keyframes wave {
     0% { bottom: 20px; opacity: 1; }
     50% { bottom: 25px; opacity: 0.5; }
     100% { bottom: 20px; opacity: 1; }
+}
+
+.bait {
+    animation: wave 1s ease-in-out infinite;
 }
