@@ -1,4 +1,3 @@
-/* Общие стили */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -37,7 +36,7 @@ select {
     border-radius: 5px;
 }
 
-/* Блок с водой */
+
 .water {
     position: relative;
     width: 100%;
@@ -49,7 +48,7 @@ select {
     background-position: center;
 }
 
-/* 🌿 Удочка */
+
 .rod {
     position: absolute;
     bottom: -50px;
@@ -62,20 +61,18 @@ select {
     transition: transform 0.5s ease-in-out;
 }
 
-/* Анимация заброса */
 .rod.throwing {
-    transform: rotate(-30deg); /* Отклоняем удочку назад */
+    transform: rotate(-30deg); 
 }
 
 .rod.cast {
-    transform: rotate(30deg); /* Делает резкий рывок вперед */
+    transform: rotate(30deg);
 }
 
 .rod.default {
-    transform: rotate(0deg); /* Возвращается в исходное положение */
+    transform: rotate(0deg); 
 }
 
-/* 💦 Анимация полета наживки */
 .bait {
     position: absolute;
     bottom: 20px;
@@ -85,10 +82,9 @@ select {
 }
 
 .bait.flying {
-    transform: translate(-10px, -50px); /* Полет наживки перед падением в воду */
+    transform: translate(-10px, -50px); 
 }
 
-/* 🐟 Анимация поклевки */
 .bait.biting {
     animation: bite 0.2s ease-in-out infinite alternate;
 }
@@ -98,7 +94,6 @@ select {
     100% { transform: translateY(-5px); }
 }
 
-/* 🌊 Анимация волн */
 @keyframes wave {
     0% { bottom: 20px; opacity: 1; }
     50% { bottom: 25px; opacity: 0.5; }
@@ -108,7 +103,7 @@ select {
 .bait {
     animation: wave 1s ease-in-out infinite;
 }
-/* Плашка с инвентарем */
+
 .inventory-bar {
     position: fixed;
     bottom: 0;
@@ -118,14 +113,14 @@ select {
     color: white;
     padding: 15px;
     text-align: center;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Тень сверху плашки */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);  
 }
 
 .inventory-items {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 10px; /* Добавим отступы между элементами */
+    gap: 10px;  
 }
 
   .fish-item {
@@ -134,14 +129,12 @@ select {
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
-    min-width: 120px; /* Можно увеличить ширину */
+    min-width: 120px;  
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень для лучшего восприятия */
-    transition: transform 0.2s ease-in-out; /* Плавный эффект при наведении */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.2s ease-in-out;  
 }
 
 .fish-item:hover {
-    transform: scale(1.05); /* Легкое увеличение при наведении */
+    transform: scale(1.05);  
 }
-
-  

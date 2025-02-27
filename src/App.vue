@@ -16,15 +16,21 @@
       @update-inventory="updateInventory" 
       @catch-fish="catchFish"
     />
-    
-    <!-- Плашка с инвентарем после выбора локации -->
-    <div v-if="currentLocation" class="inventory-bar">
-      <h3>Ваш инвентарь</h3>
-      <div class="inventory-items">
-        <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
-          <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image"/>
-          <p>{{ fish.name }} x {{ fish.count }}</p>
+
+    <div v-if="currentLocation" class="inventory-container">
+      <button @click="toggleInventory" class="inventory-button">Инвентарь</button>
+    </div>
+
+    <div v-if="showInventory" class="inventory-modal">
+      <div class="modal-content">
+        <h3>Ваш инвентарь</h3>
+        <div class="inventory-items">
+          <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
+            <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image"/>
+            <p>{{ fish.name }} x {{ fish.count }}</p>
+          </div>
         </div>
+        <button @click="toggleInventory">Закрыть</button>
       </div>
     </div>
   </div>
@@ -35,7 +41,6 @@ import MainMenu from "./components/MainMenu.vue";
 import FishingLocations from "./components/FishingLocations.vue";
 import FishingScreen from "./components/FishingScreen.vue";
 import Inventory from './models/inventory.js';
-import Fish from './models/fish.js';
 
 export default {
   name: "App",
@@ -63,7 +68,8 @@ export default {
         { id: 3, name: "Опарыш", catchBonus: 0.3 }
       ],
       currentLocation: null,
-      inventory: new Inventory() // создаем инвентарь
+      inventory: new Inventory(), 
+      showInventory: false 
     };
   },
   methods: {
@@ -74,21 +80,18 @@ export default {
       this.currentLocation = location;
       this.changeScreen("fishing");
     },
-    catchFish(fishName) {
-      const fish = new Fish(fishName);
-      this.inventory.addFish(fish); // добавляем рыбу в инвентарь
-      this.updateInventory(); // обновляем инвентарь после ловли
+    updateInventory(fish) {
+      this.inventory.addFish(fish);
+      this.$forceUpdate();  
     },
-    updateInventory() {
-      // Просто обновляем инвентарь
-      this.$forceUpdate();  // Обновляем компонент с инвентарем
+    toggleInventory() {
+      this.showInventory = !this.showInventory;
     }
   }
 };
 </script>
 
-<style>
-/* Глобальные стили */
+<style> 
 body {
   font-family: Arial, sans-serif;
   text-align: center;
@@ -125,37 +128,49 @@ select {
   margin: 10px 0;
   border-radius: 5px;
 }
-
-/* Визуализация воды */
-.water {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 20px;
-  background-size: cover;
-  background-position: center;
+ 
+.inventory-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
 }
 
-/* Плашка с инвентарем */
-.inventory-bar {
+.inventory-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 5px;
+}
+ 
+.inventory-modal {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  background-color: #007BFF;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+}
+ 
 .inventory-items {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
+  margin: 15px 0;
 }
 
 .fish-item {
@@ -163,7 +178,6 @@ select {
   color: #333;
   border-radius: 5px;
   padding: 10px;
-  margin: 5px;
   min-width: 120px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -180,55 +194,5 @@ select {
   margin-bottom: 5px;
   border-radius: 50%;
 }
-
-/* Удочка */
-.rod {
-  position: absolute;
-  bottom: -50px;
-  left: 50%;
-  width: 5px;
-  height: 100px;
-  background-color: #6B4F47;
-  border-radius: 5px;
-  transform-origin: top;
-  transition: transform 0.5s ease-in-out;
-}
-
-/* Анимация заброса */
-.rod.throwing {
-  transform: translateX(-50%) rotate(-30deg);
-}
-
-.rod.cast {
-  transform: translateX(-50%) rotate(90deg);
-}
-
-.rod.default {
-  transform: translateX(-50%) rotate(0deg);
-}
-
-/* Наживка */
-.bait {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  font-size: 24px;
-  transition: all 0.8s ease-in-out;
-}
-
-/* Анимация полета наживки */
-.bait.flying {
-  transform: translateY(-50px);
-}
-
-/* Анимация поклевки */
-.bait.biting {
-  animation: bite 0.5s ease-in-out infinite;
-}
-
-@keyframes bite {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
-}
+ 
 </style>
