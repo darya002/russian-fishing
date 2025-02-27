@@ -12,17 +12,20 @@
       :currentLocation="currentLocation" 
       :rods="rods" 
       :baits="baits" 
-      :inventory="inventory.getFishes()" 
+      :inventory="inventory" 
       @update-inventory="updateInventory" 
+      @catch-fish="catchFish"
     />
-    <div v-if="screen === 'inventory'">
-      <h2>Инвентарь</h2>
-      <ul>
-        <li v-for="(fish, index) in inventory.getFishes()" :key="index">
-          {{ fish.name }}: {{ fish.count }}
-        </li>
-      </ul>
-      <button @click="changeScreen('menu')">Вернуться в меню</button>
+    
+    <!-- Плашка с инвентарем после выбора локации -->
+    <div v-if="currentLocation" class="inventory-bar">
+      <h3>Ваш инвентарь</h3>
+      <div class="inventory-items">
+        <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
+          <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image"/>
+          <p>{{ fish.name }} x {{ fish.count }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -31,7 +34,8 @@
 import MainMenu from "./components/MainMenu.vue";
 import FishingLocations from "./components/FishingLocations.vue";
 import FishingScreen from "./components/FishingScreen.vue";
-import Inventory from './models/inventory.js'; 
+import Inventory from './models/inventory.js';
+import Fish from './models/fish.js';
 
 export default {
   name: "App",
@@ -70,8 +74,14 @@ export default {
       this.currentLocation = location;
       this.changeScreen("fishing");
     },
-    updateInventory(fish) {
+    catchFish(fishName) {
+      const fish = new Fish(fishName);
       this.inventory.addFish(fish); // добавляем рыбу в инвентарь
+      this.updateInventory(); // обновляем инвентарь после ловли
+    },
+    updateInventory() {
+      // Просто обновляем инвентарь
+      this.$forceUpdate();  // Обновляем компонент с инвентарем
     }
   }
 };
@@ -126,6 +136,49 @@ select {
   margin-top: 20px;
   background-size: cover;
   background-position: center;
+}
+
+/* Плашка с инвентарем */
+.inventory-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #007BFF;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.inventory-items {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fish-item {
+  background-color: #fff;
+  color: #333;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 5px;
+  min-width: 120px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.fish-item:hover {
+  transform: scale(1.05);
+}
+
+.fish-image {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 5px;
+  border-radius: 50%;
 }
 
 /* Удочка */
