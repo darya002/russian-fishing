@@ -74,7 +74,8 @@ export default {
   },
   methods: {
     changeScreen(screen) {
-      this.screen = screen;
+    console.log("Изменение экрана на:", screen); // Проверяем, вызывается ли метод
+    this.screen = screen;
     },
     selectLocation(location) {
       this.currentLocation = location;
