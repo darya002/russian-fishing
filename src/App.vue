@@ -97,15 +97,15 @@ export default {
         { id: 1, name: "Озеро", image: "/assets/lake.jpg" },
         { id: 2, name: "Река", image: "/assets/river.jpg" },
         { id: 3, name: "Пруд", image: "/assets/pond.jpg" }
-      ],
-      // Купленные снасти (по умолчанию базовые)
+      ], 
       ownedRods: [
-        { id: 1, name: "Обычная удочка", castTime: 3, catchChance: 0.3 }
+        { id: 1, name: "Обычная удочка", castTime: 3, catchChance: 0.3 },
+        { id: 2, name: "Удочка с улучшенным шансом", castTime: 3, catchChance: 0.35 }
       ],
+
       ownedBaits: [
         { id: 1, name: "Червь", catchBonus: 0.2, count: 1 }
-      ],
-      // В магазине доступны только наживки – три вида
+      ], 
       shopBaits: [
         { id: 2, name: "Кукуруза", catchBonus: 0.1, price: 30 },
         { id: 3, name: "Опарыш", catchBonus: 0.3, price: 40 },
