@@ -1,38 +1,77 @@
 <template>
-  <div id="app">
+  <div id="app"> 
     <MainMenu v-if="screen === 'menu'" @change-screen="changeScreen" />
+ 
     <FishingLocations
       v-if="screen === 'locations'"
       :locations="locations"
       @change-screen="changeScreen"
       @select-location="selectLocation"
     />
+ 
     <FishingScreen 
       v-if="screen === 'fishing'"
       :currentLocation="currentLocation" 
-      :rods="rods" 
-      :baits="baits" 
+      :rods="ownedRods" 
+      :baits="ownedBaits" 
       :inventory="inventory" 
       @update-inventory="updateInventory" 
-      @catch-fish="catchFish"
+      @change-screen="changeScreen"
+    />
+ 
+    <ShopScreen
+      v-if="screen === 'shop'"
+      :balance="balance"
+      :inventory="inventory"
+      :shopBaits="shopBaits"
+      @sell-fish-one="sellFishOne"
+      @sell-fish-all="sellFishAll"
+      @buy-bait="buyBait"
+      @change-screen="changeScreen"
     />
 
-    <div v-if="currentLocation" class="inventory-container">
+     <div v-if="screen !== 'menu' && screen !== 'shop'" class="inventory-container">
       <button @click="toggleInventory" class="inventory-button">Инвентарь</button>
+      <button @click="changeScreen('shop')" class="shop-button">Магазин</button>
+      <p class="balance">Баланс: {{ balance }} монет</p>
     </div>
 
-    <div v-if="showInventory" class="inventory-modal">
-      <div class="modal-content">
-        <h3>Ваш инвентарь</h3>
-        <div class="inventory-items">
-          <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
-            <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image"/>
+       <div v-if="showInventory" class="inventory-modal">
+    <div class="modal-content">
+      <h3>Ваш инвентарь</h3>
+      <div class="inventory-items">
+        <div class="inventory-section">
+          <h4>Пойманная рыба</h4>
+          <div
+            v-for="(fish, index) in inventory.getFishes()"
+            :key="'fish-'+index"
+            class="fish-item"
+          >
+            <img
+              v-if="fish.image"
+              :src="fish.image"
+              alt="Fish Image"
+              class="fish-image"
+            />
             <p>{{ fish.name }} x {{ fish.count }}</p>
           </div>
         </div>
-        <button @click="toggleInventory">Закрыть</button>
+
+        <div class="inventory-section">
+          <h4>Наживки</h4>
+          <div
+            v-for="(bait, index) in ownedBaits"
+            :key="'bait-'+index"
+            class="fish-item"
+          >
+            <p>{{ bait.name }} x {{ bait.count }}</p>
+          </div>
+        </div>
       </div>
+      <button @click="toggleInventory">Закрыть</button>
     </div>
+  </div>
+
   </div>
 </template>
 
@@ -40,14 +79,16 @@
 import MainMenu from "./components/MainMenu.vue";
 import FishingLocations from "./components/FishingLocations.vue";
 import FishingScreen from "./components/FishingScreen.vue";
-import Inventory from './models/inventory.js';
+import ShopScreen from "./components/ShopScreen.vue";
+import Inventory from "./models/inventory.js";
 
 export default {
   name: "App",
   components: {
     MainMenu,
     FishingLocations,
-    FishingScreen
+    FishingScreen,
+    ShopScreen
   },
   data() {
     return {
@@ -57,25 +98,31 @@ export default {
         { id: 2, name: "Река", image: "/assets/river.jpg" },
         { id: 3, name: "Пруд", image: "/assets/pond.jpg" }
       ],
-      rods: [
-        { id: 1, name: "Обычная удочка", castTime: 3, catchChance: 0.3 },
-        { id: 2, name: "Профессиональная удочка", castTime: 2, catchChance: 0.6 },
-        { id: 3, name: "Элитная удочка", castTime: 1, catchChance: 0.9 }
+      // Купленные снасти (по умолчанию базовые)
+      ownedRods: [
+        { id: 1, name: "Обычная удочка", castTime: 3, catchChance: 0.3 }
       ],
-      baits: [
-        { id: 1, name: "Червь", catchBonus: 0.2 },
-        { id: 2, name: "Кукуруза", catchBonus: 0.1 },
-        { id: 3, name: "Опарыш", catchBonus: 0.3 }
+      ownedBaits: [
+        { id: 1, name: "Червь", catchBonus: 0.2, count: 1 }
+      ],
+      // В магазине доступны только наживки – три вида
+      shopBaits: [
+        { id: 2, name: "Кукуруза", catchBonus: 0.1, price: 30 },
+        { id: 3, name: "Опарыш", catchBonus: 0.3, price: 40 },
+        { id: 4, name: "Мотыль", catchBonus: 0.2, price: 25 }
       ],
       currentLocation: null,
-      inventory: new Inventory(), 
-      showInventory: false 
+      inventory: new Inventory(),
+      showInventory: false,
+      balance: 100 
     };
   },
   methods: {
     changeScreen(screen) {
-    console.log("Изменение экрана на:", screen); // Проверяем, вызывается ли метод
-    this.screen = screen;
+      this.screen = screen;
+       if (screen === "menu") {
+        this.currentLocation = null;
+      }
     },
     selectLocation(location) {
       this.currentLocation = location;
@@ -83,16 +130,59 @@ export default {
     },
     updateInventory(fish) {
       this.inventory.addFish(fish);
-      this.$forceUpdate();  
+      this.$forceUpdate();
     },
     toggleInventory() {
       this.showInventory = !this.showInventory;
+    },
+    sellFishOne(fish) {
+      const fishPrices = { Карп: 50, Окунь: 70, Щука: 100 };
+      const price = fishPrices[fish.name] || 0;
+      if (price > 0 && fish.count > 0) {
+        this.balance += price;
+        fish.count--;
+        if (fish.count === 0) {
+          const index = this.inventory.fishes.findIndex(f => f.name === fish.name);
+          if (index !== -1) {
+            this.inventory.fishes.splice(index, 1);
+          }
+        }
+        alert(`Продана 1 ${fish.name} за ${price} монет. Текущий баланс: ${this.balance}`);
+      }
+    },
+    sellFishAll(fish) {
+      const fishPrices = { Карп: 50, Окунь: 70, Щука: 100 };
+      const price = fishPrices[fish.name] || 0;
+      if (price > 0 && fish.count > 0) {
+        const total = price * fish.count;
+        const count = fish.count;
+        this.balance += total;
+        const index = this.inventory.fishes.findIndex(f => f.name === fish.name);
+        if (index !== -1) {
+          this.inventory.fishes.splice(index, 1);
+        }
+        alert(`Проданы все (${count}) ${fish.name} за ${total} монет. Текущий баланс: ${this.balance}`);
+      }
+    },
+    buyBait(bait) {
+       if (this.balance < bait.price) {
+        alert("Недостаточно средств!");
+        return;
+      }
+      this.balance -= bait.price;
+      const exists = this.ownedBaits.find(b => b.id === bait.id);
+      if (exists) {
+        exists.count = (exists.count || 1) + 1;
+      } else {
+        this.ownedBaits.push({ ...bait, count: 1 });
+      }
+      alert(`Вы купили ${bait.name}.`);
     }
   }
 };
 </script>
 
-<style> 
+<style>
 body {
   font-family: Arial, sans-serif;
   text-align: center;
@@ -105,8 +195,6 @@ button {
   margin: 5px;
   cursor: pointer;
   border: none;
-  background-color: #007BFF;
-  color: white;
   border-radius: 5px;
 }
 
@@ -129,7 +217,7 @@ select {
   margin: 10px 0;
   border-radius: 5px;
 }
- 
+
 .inventory-container {
   position: fixed;
   top: 10px;
@@ -137,21 +225,28 @@ select {
 }
 
 .inventory-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
   background-color: #28a745;
   color: white;
-  border-radius: 5px;
 }
- 
+
+.shop-button {
+  background-color: #ffc107;
+  color: white;
+  margin-left: 10px;
+}
+
+.balance {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 .inventory-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,7 +260,7 @@ select {
   max-height: 90%;
   overflow-y: auto;
 }
- 
+
 .inventory-items {
   display: flex;
   flex-wrap: wrap;
@@ -195,5 +290,12 @@ select {
   margin-bottom: 5px;
   border-radius: 50%;
 }
- 
+.inventory-section {
+  margin-bottom: 20px;
+}
+
+.inventory-section h4 {
+  margin-bottom: 10px;
+}
+
 </style>
