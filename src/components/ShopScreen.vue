@@ -8,6 +8,7 @@
       <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
         <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image" />
         <p>{{ fish.name }} x {{ fish.count }}</p>
+        <p>{{ fish.price }} монет</p>
         <button @click="$emit('sell-fish-one', fish)">Продать одну</button>
         <button @click="$emit('sell-fish-all', fish)">Продать все</button>
       </div>
@@ -18,6 +19,14 @@
       <div v-for="bait in shopBaits" :key="bait.id" class="bait-item">
         <p>{{ bait.name }} - {{ bait.price }} монет</p>
         <button @click="$emit('buy-bait', bait)">Купить</button>
+      </div>
+    </div>
+
+    <h3>Покупка удочек</h3>
+    <div class="inventory-items">
+      <div v-for="rod in shopRods" :key="rod.id" class="rod-item">
+        <p>{{ rod.name }} - {{ rod.price }} монет</p>
+        <button @click="$emit('buy-rod', rod)">Купить</button>
       </div>
     </div>
     
@@ -40,6 +49,10 @@ export default {
     shopBaits: {
       type: Array,
       required: true
+    },
+    shopRods: {  
+      type: Array,
+      required: true
     }
   }
 };
@@ -57,7 +70,7 @@ export default {
   gap: 10px;
   margin: 15px 0;
 }
-.fish-item, .bait-item {
+.fish-item, .bait-item, .rod-item {
   background-color: #fff;
   color: #333;
   border-radius: 5px;
@@ -80,6 +93,6 @@ button {
   border: none;
   border-radius: 5px;
   background-color: #007BFF;
-  color: rgb(201, 22, 22);
+  color: white;
 }
 </style>

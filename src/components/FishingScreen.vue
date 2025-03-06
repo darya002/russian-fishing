@@ -3,12 +3,12 @@
     <h2>{{ currentLocation.name }}</h2>
     <p>Выберите снасти для каждой удочки.</p>
     
-     <div class="rod-selection">
+    <div class="rod-selection">
       <div>
         <label>Левая удочка:</label>
         <select v-model="selectedLeftRod">
           <option disabled value="">Выберите удочку</option>
-          <option v-for="rod in allRods" :key="rod.id" :value="rod">
+          <option v-for="rod in rods" :key="rod.id" :value="rod">
             {{ rod.name }}
           </option>
         </select>
@@ -17,14 +17,14 @@
         <label>Правая удочка:</label>
         <select v-model="selectedRightRod">
           <option disabled value="">Выберите удочку</option>
-          <option v-for="rod in allRods" :key="rod.id" :value="rod">
+          <option v-for="rod in rods" :key="rod.id" :value="rod">
             {{ rod.name }}
           </option>
         </select>
       </div>
     </div>
 
-     <div class="fishing-area" :style="waterStyle">
+    <div class="fishing-area" :style="waterStyle">
       <FishingRod
         :rod="selectedLeftRod"
         :baits="baits"
@@ -50,17 +50,12 @@ import FishingRod from "./FishingRod.vue";
 
 export default {
   name: "FishingScreen",
-  props: ["currentLocation", "baits", "inventory"],
+  props: ["currentLocation", "baits", "inventory", "rods"], // Передаем купленные удочки
   components: {
     FishingRod
   },
   data() {
     return {
-       allRods: [
-        { id: 1, name: "Палка и леска", castTime: 3, catchChance: 0.3 },
-        { id: 2, name: "Профессиональная удочка", castTime: 1, catchChance: 0.7 },
-        { id: 3, name: "Обычная удочка", castTime: 2, catchChance: 0.5 }
-      ],
       selectedLeftRod: null,
       selectedRightRod: null
     };

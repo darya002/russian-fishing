@@ -151,9 +151,9 @@
       },
       addFishToInventory() {
         const fishTypes = [
-          { name: "Карп", image: "/assets/carp.jpg" },
-          { name: "Окунь", image: "/assets/perch.jpg" },
-          { name: "Щука", image: "/assets/pike.jpg" }
+          { name: "Карп", image: "/assets/carp.jpg" ,price: 60},
+          { name: "Окунь", image: "/assets/perch.jpg" , price: 70},
+          { name: "Щука", image: "/assets/pike.jpg", price: 90}
         ];
         const caughtFish =
           fishTypes[Math.floor(Math.random() * fishTypes.length)];

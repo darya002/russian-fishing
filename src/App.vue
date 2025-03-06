@@ -20,15 +20,18 @@
     />
  
     <ShopScreen
-      v-if="screen === 'shop'"
-      :balance="balance"
-      :inventory="inventory"
-      :shopBaits="shopBaits"
-      @sell-fish-one="sellFishOne"
-      @sell-fish-all="sellFishAll"
-      @buy-bait="buyBait"
-      @change-screen="changeScreen"
-    />
+  v-if="screen === 'shop'"
+  :balance="balance"
+  :inventory="inventory"
+  :shopBaits="shopBaits"
+  :shopRods="shopRods" 
+  @sell-fish-one="sellFishOne"
+  @sell-fish-all="sellFishAll"
+  @buy-bait="buyBait"
+  @buy-rod="buyRod" 
+  @change-screen="changeScreen"
+/>
+
 
      <div v-if="screen !== 'menu' && screen !== 'shop'" class="inventory-container">
       <button @click="toggleInventory" class="inventory-button">Инвентарь</button>
@@ -99,17 +102,19 @@ export default {
         { id: 3, name: "Пруд", image: "/assets/pond.jpg" }
       ], 
       ownedRods: [
-        { id: 1, name: "Обычная удочка", castTime: 3, catchChance: 0.3 },
-        { id: 2, name: "Удочка с улучшенным шансом", castTime: 3, catchChance: 0.35 }
-      ],
-
-      ownedBaits: [
-        { id: 1, name: "Червь", catchBonus: 0.2, count: 1 }
+        { id: 1, name: "Палка и леска", castTime: 4, catchChance: 0.5 }
       ], 
+      shopRods: [
+        { id: 2, name: "Удочка", castTime: 3, catchChance: 0.7, price: 200 },
+        { id: 3, name: "Профессиональная удочка", castTime: 2, catchChance: 0.9, price: 500 }
+      ],
+      ownedBaits: [
+      ],
       shopBaits: [
+      { id: 1, name: "Червь", catchBonus: 0.2, price: 50 },
         { id: 2, name: "Кукуруза", catchBonus: 0.1, price: 30 },
         { id: 3, name: "Опарыш", catchBonus: 0.3, price: 40 },
-        { id: 4, name: "Мотыль", catchBonus: 0.2, price: 25 }
+        { id: 4, name: "Мотыль", catchBonus: 0.2, price: 50 }
       ],
       currentLocation: null,
       inventory: new Inventory(),
@@ -120,7 +125,7 @@ export default {
   methods: {
     changeScreen(screen) {
       this.screen = screen;
-       if (screen === "menu") {
+      if (screen === "menu") {
         this.currentLocation = null;
       }
     },
@@ -135,44 +140,56 @@ export default {
     toggleInventory() {
       this.showInventory = !this.showInventory;
     },
+    buyRod(rod) {
+      if (this.balance < rod.price) {
+        alert("Недостаточно средств!");
+        return;
+      }
+      this.balance -= rod.price;
+      this.ownedRods.push(rod);
+      this.shopRods = this.shopRods.filter(r => r.id !== rod.id);
+      alert(`Вы купили ${rod.name}!`);
+    },
     sellFishOne(fish) {
-      const fishPrices = { Карп: 50, Окунь: 70, Щука: 100 };
-      const price = fishPrices[fish.name] || 0;
-      if (price > 0 && fish.count > 0) {
-        this.balance += price;
-        fish.count--;
-        if (fish.count === 0) {
-          const index = this.inventory.fishes.findIndex(f => f.name === fish.name);
-          if (index !== -1) {
-            this.inventory.fishes.splice(index, 1);
-          }
-        }
-        alert(`Продана 1 ${fish.name} за ${price} монет. Текущий баланс: ${this.balance}`);
-      }
-    },
-    sellFishAll(fish) {
-      const fishPrices = { Карп: 50, Окунь: 70, Щука: 100 };
-      const price = fishPrices[fish.name] || 0;
-      if (price > 0 && fish.count > 0) {
-        const total = price * fish.count;
-        const count = fish.count;
-        this.balance += total;
-        const index = this.inventory.fishes.findIndex(f => f.name === fish.name);
-        if (index !== -1) {
-          this.inventory.fishes.splice(index, 1);
-        }
-        alert(`Проданы все (${count}) ${fish.name} за ${total} монет. Текущий баланс: ${this.balance}`);
-      }
-    },
+  if (fish.count > 0) {
+    const price = fish.price || 0; 
+    this.balance += price;
+    fish.count -= 1;
+    if (fish.count === 0) {
+      this.inventory.removeFish(fish.name);
+    }
+    alert(`Вы продали 1 ${fish.name} за ${price} монет.`);
+  } else {
+    alert("У вас нет этой рыбы!");
+  }
+},
+
+sellFishAll() {
+  const fishes = this.inventory.getFishes();
+  let totalEarned = 0;
+
+  fishes.forEach(fish => {
+    const price = fish.price || 0;  
+    totalEarned += price * fish.count;
+    fish.count = 0;
+  });
+
+  this.balance += totalEarned;
+  this.inventory.clearFishes();
+  
+  alert(`Вы продали всю рыбу и заработали ${totalEarned} монет!`);
+},
+
+
     buyBait(bait) {
-       if (this.balance < bait.price) {
+      if (this.balance < bait.price) {
         alert("Недостаточно средств!");
         return;
       }
       this.balance -= bait.price;
       const exists = this.ownedBaits.find(b => b.id === bait.id);
       if (exists) {
-        exists.count = (exists.count || 1) + 1;
+        exists.count += 1;
       } else {
         this.ownedBaits.push({ ...bait, count: 1 });
       }
