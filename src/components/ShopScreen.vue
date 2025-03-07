@@ -5,7 +5,7 @@
     
     <h3>Пойманная рыба</h3>
     <div class="inventory-items">
-      <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="fish-item">
+      <div v-for="(fish, index) in inventory.getFishes()" :key="index" class="item-box">
         <img v-if="fish.image" :src="fish.image" alt="Fish Image" class="fish-image" />
         <p>{{ fish.name }} x {{ fish.count }}</p>
         <p>{{ fish.price }} монет</p>
@@ -16,7 +16,7 @@
     
     <h3>Покупка наживок</h3>
     <div class="inventory-items">
-      <div v-for="bait in shopBaits" :key="bait.id" class="bait-item">
+      <div v-for="bait in shopBaits" :key="bait.id" class="item-box">
         <p>{{ bait.name }} - {{ bait.price }} монет</p>
         <button @click="$emit('buy-bait', bait)">Купить</button>
       </div>
@@ -24,7 +24,7 @@
 
     <h3>Покупка удочек</h3>
     <div class="inventory-items">
-      <div v-for="rod in shopRods" :key="rod.id" class="rod-item">
+      <div v-for="rod in shopRods" :key="rod.id" class="item-box">
         <p>{{ rod.name }} - {{ rod.price }} монет</p>
         <button @click="$emit('buy-rod', rod)">Купить</button>
       </div>
@@ -63,6 +63,7 @@ export default {
   text-align: center;
   padding: 20px;
 }
+
 .inventory-items {
   display: flex;
   flex-wrap: wrap;
@@ -70,7 +71,8 @@ export default {
   gap: 10px;
   margin: 15px 0;
 }
-.fish-item, .bait-item, .rod-item {
+
+.item-box {
   background-color: #fff;
   color: #333;
   border-radius: 5px;
@@ -79,20 +81,11 @@ export default {
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
 .fish-image {
   width: 50px;
   height: 50px;
   margin-bottom: 5px;
   border-radius: 50%;
-}
-button {
-  padding: 10px;
-  font-size: 16px;
-  margin: 5px;
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-  background-color: #007BFF;
-  color: white;
 }
 </style>

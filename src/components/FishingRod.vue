@@ -1,7 +1,7 @@
 <template>
     <div :class="['fishing-rod-container', positionClass]">
       <h3>{{ rod.name }}</h3>
-      
+  
       <div v-if="!isFishing">
         <h4>Наживки</h4>
         <select v-model="selectedBait">
@@ -14,7 +14,7 @@
           Забросить удочку
         </button>
       </div>
-      
+  
       <div v-if="isFishing" class="animation-container">
         <div
           class="rod"
@@ -25,8 +25,9 @@
             returned: isRodReturned
           }"
         ></div>
+        <div v-if="isBaitBiting" class="bite-indicator">💧</div>
       </div>
-      
+  
       <div v-if="isFishing" class="status">
         <button @click="hookFish" :disabled="!isBaitBiting">
           Подсечь!
@@ -51,7 +52,7 @@
       currentLocation: {
         type: Object,
         required: true
-      }, 
+      },
       position: {
         type: String,
         default: "left"
@@ -67,9 +68,7 @@
         isCasting: false,
         isRodDefault: true,
         isRodReturned: false,
-        isBaitFlying: false,
         isBaitBiting: false,
-        biteTimer: 2,
         fishingTimer: null
       };
     },
@@ -86,9 +85,7 @@
         if (this.selectedBait) {
           this.selectedBait.count--;
           if (this.selectedBait.count <= 0) {
-            const index = this.availableBaits.findIndex(
-              b => b.id === this.selectedBait.id
-            );
+            const index = this.availableBaits.findIndex(b => b.id === this.selectedBait.id);
             if (index !== -1) {
               this.availableBaits.splice(index, 1);
             }
@@ -101,16 +98,18 @@
           alert("Выберите наживку!");
           return;
         }
+  
         this.isFishing = true;
         this.isCaught = false;
         this.isRodDefault = false;
+        this.isRodReturned = false;
         this.isThrowing = true;
+  
         setTimeout(() => {
           this.isThrowing = false;
           this.isCasting = true;
-          this.isBaitFlying = true;
+  
           setTimeout(() => {
-            this.isBaitFlying = false;
             this.isCasting = false;
             this.startBitePhase();
           }, 800);
@@ -120,43 +119,42 @@
         const biteDelay = Math.floor(Math.random() * (7000 - 3000) + 3000);
         setTimeout(() => {
           this.isBaitBiting = true;
-          this.biteTimer = 2;
-          this.fishingTimer = setInterval(() => {
-            if (this.biteTimer > 0) {
-              this.biteTimer--;
-            } else {
-              this.isBaitBiting = false;
-              clearInterval(this.fishingTimer);
-              this.consumeBait();
-              alert("Рыба сорвалась!");
-              this.isFishing = false;
-            }
-          }, 1000);
+          this.fishingTimer = setTimeout(() => {
+            this.isBaitBiting = false;
+            this.consumeBait();
+            alert("Рыба сорвалась!");
+            this.isFishing = false;
+          }, 2000);
         }, biteDelay);
       },
       hookFish() {
         if (!this.isBaitBiting) return;
-        clearInterval(this.fishingTimer);
+  
+        clearTimeout(this.fishingTimer);
         this.consumeBait();
         this.isBaitBiting = false;
-        const randomChance = Math.random();
-        if (randomChance < this.totalCatchChance) {
+        
+        if (Math.random() < this.totalCatchChance) {
           this.isCaught = true;
           this.addFishToInventory();
         } else {
           alert("Рыба ускользнула!");
         }
+  
         this.isFishing = false;
         this.isRodReturned = true;
+        setTimeout(() => {
+          this.isRodReturned = false;
+          this.isRodDefault = true;
+        }, 1000);
       },
       addFishToInventory() {
         const fishTypes = [
-          { name: "Карп", image: "/assets/carp.jpg" ,price: 60},
-          { name: "Окунь", image: "/assets/perch.jpg" , price: 70},
-          { name: "Щука", image: "/assets/pike.jpg", price: 90}
+          { name: "Карп", image: "/assets/carp.jpg", price: 60 },
+          { name: "Окунь", image: "/assets/perch.jpg", price: 70 },
+          { name: "Щука", image: "/assets/pike.jpg", price: 90 }
         ];
-        const caughtFish =
-          fishTypes[Math.floor(Math.random() * fishTypes.length)];
+        const caughtFish = fishTypes[Math.floor(Math.random() * fishTypes.length)];
         caughtFish.count = 1;
         alert(`Поздравляем, вы поймали ${caughtFish.name}!`);
         this.$emit("update-inventory", caughtFish);
@@ -175,9 +173,10 @@
     border-radius: 10px;
   }
   
-   .rod-left {
+  .rod-left {
     left: 10%;
   }
+  
   .rod-right {
     right: 10%;
   }
@@ -202,36 +201,31 @@
   .rod.throwing {
     transform: translateX(-50%) rotate(-30deg);
   }
+  
   .rod.cast {
     transform: translateX(-50%) rotate(90deg);
   }
+  
   .rod.default {
     transform: translateX(-50%) rotate(0deg);
   }
+  
   .rod.returned {
     transform: translateX(-50%) rotate(0deg);
   }
   
-  .bait {
+  .bite-indicator {
     position: absolute;
-    bottom: 20px;
     left: 50%;
+    bottom: 30px;
     font-size: 24px;
-    transition: all 0.8s ease-in-out;
+    animation: shake 0.5s infinite ease-in-out;
   }
   
-  .bait.flying {
-    transform: translateY(-50px);
-  }
-  
-  .bait.biting {
-    animation: bite 0.5s ease-in-out infinite;
-  }
-  
-  @keyframes bite {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0); }
+  @keyframes shake {
+    0% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    100% { transform: translateX(-5px); }
   }
   
   .status {
